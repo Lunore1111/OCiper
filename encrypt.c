@@ -2,13 +2,22 @@
 #include<inttypes.h>
 #include<stdlib.h>
 #include<time.h>
-int main()
+
+#define SUCCESS_TOKEN 1;
+
+int main(int argc,char* argv[])
 {
- 
+  
+  if(argc < 2)
+  {
+    printf("pls pass the file which you have to encrypt");
+    return -1;
+  }
+
     int correct = 0;
 
     srand(time(nullptr));
-    FILE* in = fopen("custom lady.png","rb");
+    FILE* in = fopen(argv[1],"rb");
     if(in == nullptr) 
     {   
         printf("file cant be opne");
@@ -20,9 +29,10 @@ int main()
     printf("%ld\n",size);
     
     int8_t* buffer = malloc(size);
-    int8_t* ran_buffer = malloc(size); 
-    int8_t* res_buffer = malloc(size);
-    int8_t* correct_buffer = malloc(size);
+    int8_t* ran_buffer = malloc(size+1); 
+    int8_t* res_buffer = malloc(size+1);
+    // int8_t* correct_buffer = malloc(size+1);
+    
     fread(buffer,1,size,in);
    
     for(int64_t i = 0;i<size;i++)
@@ -30,12 +40,15 @@ int main()
         int ran_num = (rand() % (100 - 1 + 1) + 1);
         ran_buffer[i] = ran_num;
     }
-
-   for(int64_t i = 0;i<size;i++)
+    ran_buffer[size+1] = SUCCESS_TOKEN; 
+  
+ for(int64_t i = 0;i<size;i++)
    {
      u_int8_t res = (buffer[i] + ran_buffer[i]) % 256;
      res_buffer[i] = res; 
+     // res buffer is actually encrypted file 
    }
+   res_buffer[size+1] = SUCCESS_TOKEN;
 
  FILE* store_key = fopen("key.bin","wb");
  if(store_key == nullptr)
@@ -44,15 +57,30 @@ int main()
     free(buffer);
     free(ran_buffer);
     free(res_buffer);
-    free(correct_buffer);
+// free(correct_buffer);
     return -1;
  }   
  
-fwrite(ran_buffer,1,size,store_key);
+fwrite(ran_buffer,1,size+1,store_key);
 
 fclose(store_key);
+
+
+FILE* dump_encrypted_file = fopen("encrypted","wb");
+
+if(dump_encrypted_file == nullptr)
+{
+    printf("you have fcked up");
+    free(buffer);
+    free(ran_buffer);
+    free(res_buffer);
+    return -1;
+}
+fwrite(res_buffer,1,size+1,dump_encrypted_file);
  
- FILE* out = fopen("decoded.png","wb");
+fclose(dump_encrypted_file);
+
+ /* FILE* out = fopen("decoded.png","wb");
  if(out == nullptr)
 {
     printf("out file cant be opne");
@@ -80,13 +108,15 @@ for(uint64_t i = 0;i<size;i++)
 }
 if(correct)  printf(" BINGO !!! ");
 else printf("you messed up");
+*/
 
-fclose(out);
+
+// fclose(out);
 fclose(in);
 
 
 free(buffer);
 free(ran_buffer);
 free(res_buffer);
-free(correct_buffer);
+// free(correct_buffer);
 }

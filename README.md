@@ -14,7 +14,9 @@ A C program that can encrypt and decrypt the any binary data.
 
 ## How To Run
 
-- gcc-15 file.c -o file
+- Use build file
+- ./build run_encry encrypt yourfilename
+- ./build run_decry decrypt your_encrypted_file your_key_file
 
 ## Author
 
